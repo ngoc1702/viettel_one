@@ -1,0 +1,11 @@
+<svg id="a539207c-0a46-4bd6-b637-36e5d16819cc" data-name="e2fe2331-1492-4e45-ad8e-88ded3edf233" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="303.22" height="303.22" viewBox="0 0 303.22 303.22">
+  <defs>
+    <linearGradient id="aa513796-fb97-462f-b7e4-d802a586c1f0" y1="151.61" x2="303.22" y2="151.61" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2480ff"/>
+      <stop offset="0.52" stop-color="#b737e4"/>
+      <stop offset="1" stop-color="#ff7161"/>
+    </linearGradient>
+  </defs>
+  <path d="M151.61,0A151.62,151.62,0,1,0,303.22,151.61,151.61,151.61,0,0,0,151.61,0Z" transform="translate(0 0)" fill="url(#aa513796-fb97-462f-b7e4-d802a586c1f0)"/>
+  <path id="f99640a3-cdbd-4b73-ad64-777387337fe8" data-name="MESSENGER" d="M152.13,67.14c-46.08,0-83.43,34.8-83.43,77.73,0,24.46,12.13,46.28,31.09,60.53V235l28.41-15.69a89.15,89.15,0,0,0,23.93,3.25c46.08,0,83.43-34.8,83.43-77.73S198.21,67.14,152.13,67.14Zm8.29,104.68L139.17,149l-41.45,22.8,45.6-48.71,21.76,22.8L206,123.11Z" transform="translate(0 0)" fill="#fff" fill-rule="evenodd"/>
+</svg>

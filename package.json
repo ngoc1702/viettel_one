@@ -1,0 +1,47 @@
+{
+  "name": "viettelads.vn",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "postbuild": "next-sitemap",
+    "start": "next start -p 3002",
+    "lint": "next lint",
+    "typegen": " sanity schema extract --path=src/sanity/extract.json && sanity typegen generate "
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.1",
+    "@fortawesome/free-brands-svg-icons": "^6.7.1",
+    "@fortawesome/free-solid-svg-icons": "^6.7.1",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@portabletext/types": "^2.0.13",
+    "@sanity/client": "^6.22.5",
+    "@sanity/desk-tool": "^2.36.2",
+    "@sanity/icons": "^3.4.0",
+    "@sanity/image-url": "^1.1.0",
+    "@sanity/orderable-document-list": "^1.2.3",
+    "@sanity/vision": "^3.65.0",
+    "next": "^15.0.3",
+    "next-sanity": "^9.8.19",
+    "next-seo": "^6.6.0",
+    "next-sitemap": "^4.2.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.4.0",
+    "react-spinners": "^0.15.0",
+    "sanity": "^3.65.0",
+    "styled-components": "^6.1.13",
+    "swiper": "^11.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "15.0.3",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
