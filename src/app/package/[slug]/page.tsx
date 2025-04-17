@@ -92,7 +92,7 @@ const extractText = (
     : text;
 };
 export default async function Page({ params }: PageProps) {
-  const resolvedParams = await params; // Resolve the Promise
+  const resolvedParams = await params; 
   const post = await fetchPost(resolvedParams.slug);
   if (!post) return <div>Không tìm thấy gói cước</div>;
   const productSchema = {

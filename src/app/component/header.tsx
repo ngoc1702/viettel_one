@@ -118,7 +118,9 @@ export default function Header() {
             <div className="text-gray-700 text-[18px] font-medium leading-6 whitespace-nowrap">
               <Link href="/" onClick={closeModal}>Trang chủ</Link>
             </div>
-
+            <div className="text-gray-700 text-[18px] font-medium leading-6 whitespace-nowrap">
+              <Link href="/internet" onClick={closeModal}>Internet</Link>
+            </div>
             <div className="text-gray-700 text-[18px] font-medium leading-6 whitespace-nowrap">
               <Link href="/news" onClick={closeModal}>Tin tức</Link>
             </div>
