@@ -85,31 +85,43 @@ export default function PACKAGE_SIMILAR({ slug }: { slug: string }) {
       try {
         const post = await fetchPost(slug);
         setSelectedPost(post);
-
-        if (!post?.categories || !post?.sub_categories) {
+  
+        if (!post?.categories) {
           setPosts([]);
           return;
         }
-
+  
         const fetchedPosts = await client.fetch<Post[]>(POSTS_QUERY2);
-
-        const filteredPosts = fetchedPosts.filter(
-          (fetchedPost) =>
+  
+        const filteredPosts = fetchedPosts.filter((fetchedPost) => {
+          const sameCategory =
             fetchedPost.categories?.some((fetchedCategory) =>
               post.categories.some(
                 (selectedCategory) =>
                   selectedCategory.title === fetchedCategory.title
               )
-            ) &&
+            ) ?? false;
+  
+          const sameSubCategory =
             fetchedPost.sub_categories?.some((fetchedSubCategory) =>
-              post.sub_categories.some(
+              post.sub_categories?.some(
                 (selectedSubCategory) =>
                   selectedSubCategory.title === fetchedSubCategory.title
               )
-            ) &&
+            ) ?? false;
+  
+          // Ưu tiên lọc theo sub_categories nếu có, nếu không có thì lọc theo categories
+          const isSimilar =
+            post.sub_categories?.length > 0
+              ? sameSubCategory
+              : sameCategory;
+  
+          return (
+            isSimilar &&
             fetchedPost.slug.current !== post.slug.current
-        );
-
+          );
+        });
+  
         setPosts(filteredPosts);
       } catch (err) {
         console.error("Lỗi khi fetch data:", err);
@@ -117,7 +129,7 @@ export default function PACKAGE_SIMILAR({ slug }: { slug: string }) {
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, [slug]);
 
@@ -136,8 +148,8 @@ export default function PACKAGE_SIMILAR({ slug }: { slug: string }) {
 
   const handleClosePopup = () => {
     setIsPopupVisible(false);
-    // setSelectedPost(null); // Uncomment if you want to reset selectedPost
   };
+
 
   return (
     <>
