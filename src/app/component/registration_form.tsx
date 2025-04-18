@@ -1,134 +1,159 @@
 "use client";
-import { useState } from "react";
-import AddressForm, { AddressData }  from "./api_address"; 
+import { useState, useEffect, useCallback } from "react";
+import AddressForm, { AddressData } from "./api_address";
+import emailjs from "emailjs-com";
+
+
 
 type FormData = {
-    name: string;
-    phone: string;
-    serviceOption: string;
-    addressOption: string;
-  };
-  
-  type ErrorMessages = {
-    name: string;
-    phone: string;
-    serviceOption: string;
-    addressOption: string;
-    address: string;
-  };
-  
-  export default function REGISTRATION_FORM() {
-    const [address, setAddress] = useState<AddressData | null>(null);
-  
-    const handleAddressChange = (value: AddressData) => {
-      setAddress(value);
-      console.log("Dữ liệu địa chỉ đầy đủ:", value);
-    };
-  
-    const [formData, setFormData] = useState<FormData>({
-      name: "",
-      phone: "",
-      serviceOption: "",
-      addressOption: "",
-    });
-  
-    const [errors, setErrors] = useState<ErrorMessages>({
-      name: "",
-      phone: "",
-      serviceOption: "",
-      addressOption: "",
-      address: "", // Lỗi cho địa chỉ
-    });
-  
-    const getErrorMessage = (name: string, value: string): string => {
-      if (name === "name") {
-        if (!value.trim()) return "Vui lòng nhập họ và tên";
-      }
-  
-      if (name === "phone") {
-        const phoneRegex = /^0\d{9}$/;
-        if (!phoneRegex.test(value))
-          return "Số điện thoại phải bắt đầu bằng 0 và gồm 10 số";
-      }
-  
-      if (name === "serviceOption") {
-        if (!value) return "Vui lòng chọn một hình thức đăng ký";
-      }
-  
-      if (name === "addressOption") {
-        if (!value) return "Vui lòng chọn một địa chỉ lắp đặt";
-      }
-  
-      return "";
-    };
-  
-    // Kiểm tra lỗi địa chỉ
-    const getAddressError = () => {
-      if (!address) {
-        return "Vui lòng nhập đầy đủ địa chỉ lắp đặt";
-      }
-  
-      if (!address.cityCode || !address.districtCode || !address.wardCode || !address.detail) {
-        return "Vui lòng chọn đầy đủ Tỉnh/Thành, Quận/Huyện, Phường/Xã và Địa chỉ chi tiết";
-      }
-  
-      return "";
-    };
-  
-    const handleChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    };
-  
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-  
-      // Kiểm tra lỗi cho tất cả các trường trong form
-      for (const [key, value] of Object.entries(formData)) {
-        const error = getErrorMessage(key, value);
-        if (error) {
-          setErrors((prev) => ({
-            ...prev,
-            [key]: error,
-          }));
-          return;
-        }
-      }
-  
-      // Kiểm tra lỗi cho địa chỉ
-      const addressError = getAddressError();
-      if (addressError) {
-        setErrors((prev) => ({
-          ...prev,
-          address: addressError,
-        }));
-        return;
-      }
-  
-      const readableData = `
-      Họ tên: ${formData.name}
-      Số điện thoại: ${formData.phone}
-      Hình thức đăng ký: ${
-        formData.serviceOption === "new" ? "Đăng kí mới" : "Đăng kí thêm"
-      }
-      Địa chỉ lắp đặt: ${
-        formData.addressOption === "private"
-          ? "Nhà riêng"
-          : "Khu đô thị / Chung cư"
-      }
-      ${address ? `
-      Địa chỉ chi tiết: ${address.cityName}, ${address.districtName}, ${address.wardName}, ${address.detail}
-      ` : ''}
-      `;
-  
-      console.log("Dữ liệu hợp lệ:", formData);
-      alert(`Đăng ký thành công!\n${readableData}`);
-    };
-  
+  name: string;
+  phone: string;
+  serviceOption: string;
+  addressOption: string;
+  cityName: string;
+  districtName: string;
+  wardName: string;
+  detail: string;
+};
 
+type ErrorMessages = {
+  name: string;
+  phone: string;
+  serviceOption: string;
+  addressOption: string;
+  address: string;
+};
+
+export default function REGISTRATION_FORM() {
+  const [address, setAddress] = useState<AddressData | null>(null);
+
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    phone: "",
+    serviceOption: "",
+    addressOption: "",
+    cityName: "",
+    districtName: "",
+    wardName: "",
+    detail: "",
+  });
+
+  const [errors, setErrors] = useState<ErrorMessages>({
+    name: "",
+    phone: "",
+    serviceOption: "",
+    addressOption: "",
+    address: "",
+  });
+
+  const formErrors = {
+    city: { field: "city", message: "Vui lòng chọn tỉnh/thành phố" },
+    district: { field: "district", message: "Vui lòng chọn quận/huyện" },
+    ward: { field: "ward", message: "Vui lòng chọn phường/xã" },
+    detail: { field: "detail", message: "Vui lòng nhập địa chỉ chi tiết" },
+  };
+
+  const handleAddressChange = useCallback((value: AddressData) => {
+    setAddress(value);
+  }, []);
+
+  useEffect(() => {
+    if (address) {
+      setFormData((prev) => ({
+        ...prev,
+        cityName: address.cityName || "",
+        districtName: address.districtName || "",
+        wardName: address.wardName || "",
+        detail: address.detail || "",
+      }));
+    }
+  }, [address]);
+
+  const getErrorMessage = (name: string, value: string): string => {
+    if (name === "name" && !value.trim()) return "Vui lòng nhập họ và tên";
+
+    if (name === "phone") {
+      const phoneRegex = /^0\d{9}$/;
+      if (!phoneRegex.test(value))
+        return "Số điện thoại phải bắt đầu bằng 0 và gồm 10 số";
+    }
+
+    if (name === "serviceOption" && !value)
+      return "Vui lòng chọn một hình thức đăng ký";
+
+    if (name === "addressOption" && !value)
+      return "Vui lòng chọn một địa chỉ lắp đặt";
+
+    return "";
+  };
+
+  // ✅ Hàm kiểm tra lỗi địa chỉ tổng quát
+  const getAddressError = () => {
+    if (!address || !address.cityCode) return formErrors.city.message;
+    if (!address.districtCode) return formErrors.district.message;
+    if (!address.wardCode) return formErrors.ward.message;
+    if (!address.detail) return formErrors.detail.message;
+    return "";
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    let hasError = false;
+    const newErrors = { ...errors };
+
+    for (const [key, value] of Object.entries(formData)) {
+      const error = getErrorMessage(key, value);
+      if (error) {
+        newErrors[key as keyof ErrorMessages] = error;
+        hasError = true;
+      }
+    }
+
+    const addressError = getAddressError();
+    if (addressError) {
+      newErrors.address = addressError;
+      hasError = true;
+    }
+
+    if (hasError) {
+      setErrors(newErrors);
+      return;
+    }
+
+    const readableData = `Tên: ${formData.name}
+Số điện thoại: ${formData.phone}
+Hình thức đăng ký: ${formData.serviceOption}
+Địa chỉ lắp đặt: ${formData.addressOption}
+Địa chỉ chi tiết: ${formData.detail}, ${formData.wardName}, ${formData.districtName}, ${formData.cityName}`;
+
+    console.log("Dữ liệu hợp lệ:", formData);
+    alert(`Đăng ký thành công!\n${readableData}`);
+
+    emailjs
+      .send(
+        "service_d3cl9zs",
+        "template_ujn0z5a",
+        formData,
+        "V1jsomCPawnaiuZv0"
+      )
+      .then((response) => {
+        console.log("Email sent successfully:", response);
+      })
+      .catch((error) => {
+        console.error("Error sending email:", error);
+      });
+  };
+
+  
   return (
     <form className="mx-auto" onSubmit={handleSubmit}>
       <div className="flex justify-center items-center">
@@ -181,8 +206,8 @@ type FormData = {
             <input
               type="radio"
               name="serviceOption"
-              value="new"
-              checked={formData.serviceOption === "new"}
+              value="Đăng kí mới"
+              checked={formData.serviceOption === "Đăng kí mới"}
               onChange={handleChange}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
@@ -192,8 +217,8 @@ type FormData = {
             <input
               type="radio"
               name="serviceOption"
-              value="additional"
-              checked={formData.serviceOption === "additional"}
+              value="Đăng kí thêm"
+              checked={formData.serviceOption === "Đăng kí thêm"}
               onChange={handleChange}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
@@ -215,8 +240,8 @@ type FormData = {
             <input
               type="radio"
               name="addressOption"
-              value="private"
-              checked={formData.addressOption === "private"}
+              value="Nhà riêng"
+              checked={formData.addressOption === "Nhà riêng"}
               onChange={handleChange}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
@@ -226,8 +251,8 @@ type FormData = {
             <input
               type="radio"
               name="addressOption"
-              value="apartment"
-              checked={formData.addressOption === "apartment"}
+              value="Khu đô thị / Chung cư"
+              checked={formData.addressOption === "Khu đô thị / Chung cư"}
               onChange={handleChange}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
@@ -242,10 +267,14 @@ type FormData = {
       </div>
 
       <div className=" mb-5">
-      <AddressForm onChange={handleAddressChange} />
+        <AddressForm
+          onChange={handleAddressChange}
+          error={formErrors} // Change 'errors' to 'error'
+          getAddressError={getAddressError}
+        />
       </div>
       <pre className="mt-6 p-4 bg-gray-100 rounded text-sm text-gray-800 hidden">
-        {address ? JSON.stringify(address, null, 2) : 'Chưa có dữ liệu'}
+        {address ? JSON.stringify(address, null, 2) : "Chưa có dữ liệu"}
       </pre>
 
       <button

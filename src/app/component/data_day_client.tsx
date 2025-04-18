@@ -45,7 +45,7 @@ declare global {
   }
 }
 
-export default function DATA_MONTH_CLIENT({ posts }: { posts: Post[] }) {
+export default function DATA_DAY_CLIENT({ posts }: { posts: Post[] }) {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isContentVisible, setIsContentVisible] = useState(true);
