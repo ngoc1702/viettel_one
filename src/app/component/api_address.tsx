@@ -1,23 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import { useEffect, useState, useCallback } from "react";
+import axios from "axios";
 
-
-// Define the types for address and errors
-interface Location {
+export interface Location {
   code: number;
   name: string;
 }
+export type Ward = Location;
 
-interface Province {
-  code: number;
-  name: string;
-  districts: Location[];
+export interface District extends Location {
+  wards: Ward[];
 }
 
-interface District {
-  code: number;
-  name: string;
-  wards: Location[];
+export interface Province extends Location {
+  districts: District[];
 }
 
 export interface AddressData {
@@ -30,87 +25,92 @@ export interface AddressData {
   detail: string;
 }
 
-// AddressFieldError type to track field-specific errors
-interface AddressFieldError {
-  field: string | null;
-  message: string;
+export interface AddressErrors {
+  cityCode?: string;
+  districtCode?: string;
+  wardCode?: string;
+  detail?: string;
 }
-
-type AddressErrors = Partial<{
-  city: AddressFieldError;
-  district: AddressFieldError;
-  ward: AddressFieldError;
-  detail: AddressFieldError;
-}>;
 
 export default function AddressForm({
   onChange,
-  error,
-  // getAddressError,
+  isSubmitted,
 }: {
   onChange: (address: AddressData) => void;
-  error?: AddressErrors;
-  getAddressError: (field: keyof AddressData) => string;
+  isSubmitted: boolean;
 }) {
   const [cities, setCities] = useState<Location[]>([]);
   const [districts, setDistricts] = useState<Location[]>([]);
   const [wards, setWards] = useState<Location[]>([]);
 
-  const [selectedCityCode, setSelectedCityCode] = useState('');
-  const [selectedDistrictCode, setSelectedDistrictCode] = useState('');
-  const [selectedWardCode, setSelectedWardCode] = useState('');
-  const [detailAddress, setDetailAddress] = useState('');
+  const [selectedCityCode, setSelectedCityCode] = useState("");
+  const [selectedDistrictCode, setSelectedDistrictCode] = useState("");
+  const [selectedWardCode, setSelectedWardCode] = useState("");
+  const [detailAddress, setDetailAddress] = useState("");
 
-  // Fetch cities on component mount
+  // Fetch cities
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const res = await axios.get<Location[]>('https://provinces.open-api.vn/api/?depth=1');
+        const res = await axios.get<Location[]>(
+          "https://provinces.open-api.vn/api/?depth=1"
+        );
         setCities(res.data);
       } catch (err) {
-        console.error('Error fetching cities:', err);
+        console.error("Error fetching cities:", err);
       }
     };
     fetchCities();
   }, []);
 
-  // Fetch districts when city is selected
   const fetchDistricts = useCallback(async (cityCode: string) => {
     if (cityCode) {
       try {
-        const res = await axios.get<Province>(`https://provinces.open-api.vn/api/p/${cityCode}?depth=2`);
+        const res = await axios.get<Province>(
+          `https://provinces.open-api.vn/api/p/${cityCode}?depth=2`
+        );
         setDistricts(res.data.districts);
       } catch (err) {
-        console.error('Error fetching districts:', err);
+        console.error("Error fetching districts:", err);
+      }
+    }
+  }, []);
+
+  const fetchWards = useCallback(async (districtCode: string) => {
+    if (districtCode) {
+      try {
+        const res = await axios.get<District>(
+          `https://provinces.open-api.vn/api/d/${districtCode}?depth=2`
+        );
+        setWards(res.data.wards);
+      } catch (err) {
+        console.error("Error fetching wards:", err);
       }
     }
   }, []);
 
   useEffect(() => {
     fetchDistricts(selectedCityCode);
+    setSelectedDistrictCode("");
+    setSelectedWardCode("");
+    setDistricts([]);
+    setWards([]);
   }, [selectedCityCode, fetchDistricts]);
-
-  // Fetch wards when district is selected
-  const fetchWards = useCallback(async (districtCode: string) => {
-    if (districtCode) {
-      try {
-        const res = await axios.get<District>(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
-        setWards(res.data.wards);
-      } catch (err) {
-        console.error('Error fetching wards:', err);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     fetchWards(selectedDistrictCode);
+    setSelectedWardCode("");
+    setWards([]);
   }, [selectedDistrictCode, fetchWards]);
 
-  // Update parent component when address changes
   useEffect(() => {
-    const cityName = cities.find((c) => c.code.toString() === selectedCityCode)?.name || '';
-    const districtName = districts.find((d) => d.code.toString() === selectedDistrictCode)?.name || '';
-    const wardName = wards.find((w) => w.code.toString() === selectedWardCode)?.name || '';
+    const cityName =
+      cities.find((c) => c.code.toString() === selectedCityCode)?.name || "";
+    const districtName =
+      districts.find((d) => d.code.toString() === selectedDistrictCode)?.name ||
+      "";
+    const wardName =
+      wards.find((w) => w.code.toString() === selectedWardCode)?.name || "";
 
     const addressData: AddressData = {
       cityCode: selectedCityCode,
@@ -125,18 +125,42 @@ export default function AddressForm({
     if (onChange) {
       onChange(addressData);
     }
-  }, [selectedCityCode, selectedDistrictCode, selectedWardCode, detailAddress, cities, districts, wards, onChange]);
+  }, [
+    selectedCityCode,
+    selectedDistrictCode,
+    selectedWardCode,
+    detailAddress,
+    cities,
+    districts,
+    wards,
+    onChange,
+  ]);
 
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCityCode(e.target.value);
+  };
+
+  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedDistrictCode(e.target.value);
+  };
+
+  const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedWardCode(e.target.value);
+  };
 
   return (
     <div>
-      <div className="block mb-3 text-base font-semibold text-gray-700">Nhập địa chỉ</div>
+      <div className="block mb-3 text-base font-semibold text-gray-700">
+        Nhập địa chỉ
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-10 md:gap-y-4 gap-4">
+        {/* Tỉnh/Thành phố */}
         <div>
           <select
+            name="cityName"
             value={selectedCityCode}
-            onChange={(e) => setSelectedCityCode(e.target.value)}
-            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            onChange={handleCityChange}
+            className="w-full border rounded px-3 py-2"
           >
             <option value="">Chọn Tỉnh/Thành phố</option>
             {cities.map((city) => (
@@ -145,14 +169,20 @@ export default function AddressForm({
               </option>
             ))}
           </select>
-          {error?.city && <span className="text-red-500 text-sm mt-1">{error.city.message}</span>}
+          {isSubmitted && !selectedCityCode && (
+            <p className="text-red-500 text-sm mt-1">
+              Vui lòng chọn Tỉnh/Thành phố
+            </p>
+          )}
         </div>
 
+        {/* Quận/Huyện */}
         <div>
           <select
+            name="districtName"
             value={selectedDistrictCode}
-            onChange={(e) => setSelectedDistrictCode(e.target.value)}
-            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            onChange={handleDistrictChange}
+            className="w-full border rounded px-3 py-2"
             disabled={!selectedCityCode}
           >
             <option value="">Chọn Quận/Huyện</option>
@@ -162,14 +192,20 @@ export default function AddressForm({
               </option>
             ))}
           </select>
-          {error?.district && <span className="text-red-500 text-sm mt-1">{error.district.message}</span>}
+          {isSubmitted && selectedCityCode && !selectedDistrictCode && (
+            <p className="text-red-500 text-sm mt-1">
+              Vui lòng chọn Quận/Huyện
+            </p>
+          )}
         </div>
 
+        {/* Phường/Xã */}
         <div>
           <select
+            name="wardName"
             value={selectedWardCode}
-            onChange={(e) => setSelectedWardCode(e.target.value)}
-            className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
+            onChange={handleWardChange}
+            className="w-full border rounded px-3 py-2"
             disabled={!selectedDistrictCode}
           >
             <option value="">Chọn Phường/Xã</option>
@@ -179,20 +215,30 @@ export default function AddressForm({
               </option>
             ))}
           </select>
-          {error?.ward && <span className="text-red-500 text-sm mt-1">{error.ward.message}</span>}
+          {isSubmitted && selectedDistrictCode && !selectedWardCode && (
+            <p className="text-red-500 text-sm mt-1">Vui lòng chọn Phường/Xã</p>
+          )}
+        </div>
+
+        {/* Địa chỉ chi tiết */}
+        <div>
+          <input
+            type="text"
+            name="detail"
+            placeholder="Số nhà, tên đường..."
+            value={detailAddress}
+            onChange={(e) => setDetailAddress(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+          />
+          {isSubmitted && selectedCityCode && selectedDistrictCode && selectedWardCode && !detailAddress && (
+            <p className="text-red-500 text-sm mt-1">
+              Vui lòng nhập địa chỉ chi tiết
+            </p>
+          )}
+        </div>
       </div>
-     
-      <div className="">
-        <input
-          type="text"
-          placeholder="Địa chỉ cụ thể"
-          value={detailAddress}
-          onChange={(e) => setDetailAddress(e.target.value)}
-          className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 w-full"
-        />
-        {error?.detail && <span className="text-red-500 text-sm mt-1">{error.detail.message}</span>}
-      </div>
-    </div>
     </div>
   );
 }
+
+

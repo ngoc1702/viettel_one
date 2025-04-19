@@ -4,7 +4,7 @@ import DATA_INTERNET from "../component/data_internet";
 export default function Page() {
   return (
     <>
-      <div className="relative w-full h-[200px] rounded-full overflow-hidden mt-[77px] md:mt-[88px]">
+      <div className="relative w-full h-[200px]  overflow-hidden mt-[77px] md:mt-[88px]">
         <Image
           src={Background}
           alt="bg"

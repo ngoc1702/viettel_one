@@ -3,8 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import AddressForm, { AddressData } from "./api_address";
 import emailjs from "emailjs-com";
 
-
-
 type FormData = {
   name: string;
   phone: string;
@@ -21,12 +19,16 @@ type ErrorMessages = {
   phone: string;
   serviceOption: string;
   addressOption: string;
-  address: string;
+  cityName: string;
+  districtName: string;
+  wardName: string;
+  detail: string;
 };
 
 export default function REGISTRATION_FORM() {
-  const [address, setAddress] = useState<AddressData | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
+  const [address, setAddress] = useState<AddressData | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
@@ -43,18 +45,69 @@ export default function REGISTRATION_FORM() {
     phone: "",
     serviceOption: "",
     addressOption: "",
-    address: "",
+    cityName: "",
+    districtName: "",
+    wardName: "",
+    detail: "",
   });
 
-  const formErrors = {
-    city: { field: "city", message: "Vui lòng chọn tỉnh/thành phố" },
-    district: { field: "district", message: "Vui lòng chọn quận/huyện" },
-    ward: { field: "ward", message: "Vui lòng chọn phường/xã" },
-    detail: { field: "detail", message: "Vui lòng nhập địa chỉ chi tiết" },
+  const getErrorMessage = (key: string, value: string): string => {
+    if (!value || value.trim() === "") {
+      if (["cityName", "districtName", "wardName", "detail"].includes(key)) {
+        return "Vui lòng nhập đầy đủ địa chỉ lắp đặt.";
+      }
+
+      switch (key) {
+        case "name":
+          return "Vui lòng nhập họ tên.";
+        case "phone":
+          return "Vui lòng nhập số điện thoại.";
+        case "serviceOption":
+          return "Vui lòng chọn hình thức đăng ký.";
+        case "addressOption":
+          return "Vui lòng chọn địa chỉ lắp đặt.";
+        default:
+          return "Trường này là bắt buộc.";
+      }
+    }
+
+    // Advanced validation for phone number
+    if (key === "phone") {
+      const phoneRegex = /^0\d{9}$/; // Starts with 0 and followed by exactly 9 digits
+      if (!phoneRegex.test(value.trim())) {
+        return "Số điện thoại phải bắt đầu 0 và đủ 10 số.";
+      }
+    }
+
+    return "";
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleAddressChange = useCallback((value: AddressData) => {
     setAddress(value);
+
+    setFormData((prev) => ({
+      ...prev,
+      cityName: value.cityName || "",
+      districtName: value.districtName || "",
+      wardName: value.wardName || "",
+      detail: value.detail || "",
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      cityName: value.cityName ? "" : prev.cityName,
+      districtName: value.districtName ? "" : prev.districtName,
+      wardName: value.wardName ? "" : prev.wardName,
+      detail: value.detail?.trim() ? "" : prev.detail,
+    }));
   }, []);
 
   useEffect(() => {
@@ -69,75 +122,49 @@ export default function REGISTRATION_FORM() {
     }
   }, [address]);
 
-  const getErrorMessage = (name: string, value: string): string => {
-    if (name === "name" && !value.trim()) return "Vui lòng nhập họ và tên";
-
-    if (name === "phone") {
-      const phoneRegex = /^0\d{9}$/;
-      if (!phoneRegex.test(value))
-        return "Số điện thoại phải bắt đầu bằng 0 và gồm 10 số";
-    }
-
-    if (name === "serviceOption" && !value)
-      return "Vui lòng chọn một hình thức đăng ký";
-
-    if (name === "addressOption" && !value)
-      return "Vui lòng chọn một địa chỉ lắp đặt";
-
-    return "";
-  };
-
-  // ✅ Hàm kiểm tra lỗi địa chỉ tổng quát
-  const getAddressError = () => {
-    if (!address || !address.cityCode) return formErrors.city.message;
-    if (!address.districtCode) return formErrors.district.message;
-    if (!address.wardCode) return formErrors.ward.message;
-    if (!address.detail) return formErrors.detail.message;
-    return "";
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    setIsSubmitted(true);
+  
     let hasError = false;
-    const newErrors = { ...errors };
-
-    for (const [key, value] of Object.entries(formData)) {
+    const newErrors: ErrorMessages = { ...errors };
+  
+    // Chỉ kiểm tra các trường cơ bản ở đây
+    const baseFields: (keyof typeof formData)[] = [
+      "name",
+      "phone",
+      "serviceOption",
+      "addressOption",
+    ];
+  
+    for (const key of baseFields) {
+      const value = formData[key];
       const error = getErrorMessage(key, value);
       if (error) {
-        newErrors[key as keyof ErrorMessages] = error;
+        newErrors[key] = error;
         hasError = true;
+        break;
+      } else {
+        newErrors[key] = "";
       }
     }
-
-    const addressError = getAddressError();
-    if (addressError) {
-      newErrors.address = addressError;
-      hasError = true;
-    }
-
+  
     if (hasError) {
       setErrors(newErrors);
       return;
     }
-
+  
+    // Nếu bạn muốn validate địa chỉ sau khi form cơ bản ok, có thể gọi hàm validate từ file phụ
+    // Ví dụ: if (!isAddressValid()) return;
+  
     const readableData = `Tên: ${formData.name}
-Số điện thoại: ${formData.phone}
-Hình thức đăng ký: ${formData.serviceOption}
-Địa chỉ lắp đặt: ${formData.addressOption}
-Địa chỉ chi tiết: ${formData.detail}, ${formData.wardName}, ${formData.districtName}, ${formData.cityName}`;
-
-    console.log("Dữ liệu hợp lệ:", formData);
+  Số điện thoại: ${formData.phone}
+  Hình thức đăng ký: ${formData.serviceOption}
+  Địa chỉ lắp đặt: ${formData.addressOption}
+  Địa chỉ chi tiết: ${formData.detail}, ${formData.wardName}, ${formData.districtName}, ${formData.cityName}`;
+  
     alert(`Đăng ký thành công!\n${readableData}`);
-
+  
     emailjs
       .send(
         "service_d3cl9zs",
@@ -152,8 +179,8 @@ Hình thức đăng ký: ${formData.serviceOption}
         console.error("Error sending email:", error);
       });
   };
-
   
+
   return (
     <form className="mx-auto" onSubmit={handleSubmit}>
       <div className="flex justify-center items-center">
@@ -267,11 +294,7 @@ Hình thức đăng ký: ${formData.serviceOption}
       </div>
 
       <div className=" mb-5">
-        <AddressForm
-          onChange={handleAddressChange}
-          error={formErrors} // Change 'errors' to 'error'
-          getAddressError={getAddressError}
-        />
+        <AddressForm onChange={handleAddressChange} isSubmitted={isSubmitted} />
       </div>
       <pre className="mt-6 p-4 bg-gray-100 rounded text-sm text-gray-800 hidden">
         {address ? JSON.stringify(address, null, 2) : "Chưa có dữ liệu"}
