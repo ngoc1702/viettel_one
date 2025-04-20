@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect, useCallback } from "react";
 import AddressForm, { AddressData } from "./api_address";
 import emailjs from "emailjs-com";
@@ -15,20 +16,12 @@ type FormData = {
 };
 
 type ErrorMessages = {
-  name: string;
-  phone: string;
-  serviceOption: string;
-  addressOption: string;
-  cityName: string;
-  districtName: string;
-  wardName: string;
-  detail: string;
+  [K in keyof FormData]: string;
 };
 
 export default function REGISTRATION_FORM() {
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
   const [address, setAddress] = useState<AddressData | null>(null);
+
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
@@ -53,10 +46,6 @@ export default function REGISTRATION_FORM() {
 
   const getErrorMessage = (key: string, value: string): string => {
     if (!value || value.trim() === "") {
-      if (["cityName", "districtName", "wardName", "detail"].includes(key)) {
-        return "Vui lòng nhập đầy đủ địa chỉ lắp đặt.";
-      }
-
       switch (key) {
         case "name":
           return "Vui lòng nhập họ tên.";
@@ -66,21 +55,29 @@ export default function REGISTRATION_FORM() {
           return "Vui lòng chọn hình thức đăng ký.";
         case "addressOption":
           return "Vui lòng chọn địa chỉ lắp đặt.";
+        case "cityName":
+          return "Vui lòng chọn tỉnh/thành phố.";
+        case "districtName":
+          return "Vui lòng chọn quận/huyện.";
+        case "wardName":
+          return "Vui lòng chọn phường/xã.";
+        case "detail":
+          return "Vui lòng nhập địa chỉ chi tiết.";
         default:
-          return "Trường này là bắt buộc.";
+          return "Trường này bắt buộc.";
       }
     }
-
-    // Advanced validation for phone number
+  
     if (key === "phone") {
-      const phoneRegex = /^0\d{9}$/; // Starts with 0 and followed by exactly 9 digits
+      const phoneRegex = /^0\d{9}$/;
       if (!phoneRegex.test(value.trim())) {
-        return "Số điện thoại phải bắt đầu 0 và đủ 10 số.";
+        return "Số điện thoại phải bắt đầu bằng số 0 và có 10 số.";
       }
     }
-
+  
     return "";
   };
+  
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -92,7 +89,6 @@ export default function REGISTRATION_FORM() {
 
   const handleAddressChange = useCallback((value: AddressData) => {
     setAddress(value);
-
     setFormData((prev) => ({
       ...prev,
       cityName: value.cityName || "",
@@ -100,7 +96,6 @@ export default function REGISTRATION_FORM() {
       wardName: value.wardName || "",
       detail: value.detail || "",
     }));
-
     setErrors((prev) => ({
       ...prev,
       cityName: value.cityName ? "" : prev.cityName,
@@ -124,47 +119,69 @@ export default function REGISTRATION_FORM() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-  
     let hasError = false;
     const newErrors: ErrorMessages = { ...errors };
-  
-    // Chỉ kiểm tra các trường cơ bản ở đây
-    const baseFields: (keyof typeof formData)[] = [
+
+    // Danh sách các trường cơ bản và các trường địa chỉ
+    const baseFields: (keyof FormData)[] = [
       "name",
       "phone",
       "serviceOption",
       "addressOption",
     ];
-  
+
+    // Kiểm tra từng trường trong baseFields
     for (const key of baseFields) {
       const value = formData[key];
       const error = getErrorMessage(key, value);
       if (error) {
-        newErrors[key] = error;
-        hasError = true;
-        break;
+        newErrors[key] = error; // Lưu lỗi cho trường này
+        hasError = true; // Có lỗi, cần dừng lại
+        break; // Dừng lại nếu có lỗi, không kiểm tra các trường còn lại
       } else {
-        newErrors[key] = "";
+        newErrors[key] = ""; // Nếu không có lỗi, reset lỗi
       }
     }
-  
+
+    if (hasError) {
+      setErrors(newErrors); // Cập nhật lỗi nếu có
+      return; // Dừng lại nếu có lỗi
+    }
+
+    // Kiểm tra các trường địa chỉ (addressFields) nếu không có lỗi trước đó
+    const addressFields: (keyof FormData)[] = [
+      "cityName",
+      "districtName",
+      "wardName",
+      "detail",
+    ];
+
+    for (const key of addressFields) {
+      const value = formData[key];
+      const error = getErrorMessage(key, value);
+      if (error) {
+        newErrors[key] = error; 
+        hasError = true;
+        break; 
+      } else {
+        newErrors[key] = ""; 
+      }
+    }
+
     if (hasError) {
       setErrors(newErrors);
-      return;
+      return; 
     }
-  
-    // Nếu bạn muốn validate địa chỉ sau khi form cơ bản ok, có thể gọi hàm validate từ file phụ
-    // Ví dụ: if (!isAddressValid()) return;
-  
+
+    
     const readableData = `Tên: ${formData.name}
   Số điện thoại: ${formData.phone}
   Hình thức đăng ký: ${formData.serviceOption}
   Địa chỉ lắp đặt: ${formData.addressOption}
   Địa chỉ chi tiết: ${formData.detail}, ${formData.wardName}, ${formData.districtName}, ${formData.cityName}`;
-  
+
     alert(`Đăng ký thành công!\n${readableData}`);
-  
+
     emailjs
       .send(
         "service_d3cl9zs",
@@ -179,7 +196,6 @@ export default function REGISTRATION_FORM() {
         console.error("Error sending email:", error);
       });
   };
-  
 
   return (
     <form className="mx-auto" onSubmit={handleSubmit}>
@@ -259,7 +275,7 @@ export default function REGISTRATION_FORM() {
 
       {/* Địa chỉ lắp đặt */}
       <div className="mb-5">
-        <div className="block mb-3 text-base font-semibold text-gray-600">
+        <div className="block mb-3 text-base font-semibold text-gray-700">
           Địa chỉ lắp đặt
         </div>
         <div className="flex flex-row gap-12">
@@ -292,13 +308,19 @@ export default function REGISTRATION_FORM() {
           <p className="text-red-500 text-sm mt-1">{errors.addressOption}</p>
         )}
       </div>
-
       <div className=" mb-5">
-        <AddressForm onChange={handleAddressChange} isSubmitted={isSubmitted} />
+      <AddressForm
+  value={formData}
+  onChange={(data) => handleAddressChange(data as AddressData)} // ép kiểu tại đây
+  errors={{
+    cityName: errors.cityName,
+    districtName: errors.districtName,
+    wardName: errors.wardName,
+    detail: errors.detail,
+  }}
+/>
+
       </div>
-      <pre className="mt-6 p-4 bg-gray-100 rounded text-sm text-gray-800 hidden">
-        {address ? JSON.stringify(address, null, 2) : "Chưa có dữ liệu"}
-      </pre>
 
       <button
         type="submit"
