@@ -233,23 +233,23 @@ export default function REGISTRATION_FORM() {
             <input
               type="radio"
               name="serviceOption"
-              value="Đăng kí mới"
-              checked={formData.serviceOption === "Đăng kí mới"}
+              value="Cá nhân"
+              checked={formData.serviceOption === "Cá nhân"}
               onChange={handleChange}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
-            <span className="ml-2 text-sm text-gray-900">Đăng kí mới</span>
+            <span className="ml-2 text-sm text-gray-900">Cá nhân</span>
           </label>
           <label className="inline-flex items-center">
             <input
               type="radio"
               name="serviceOption"
-              value="Đăng kí thêm"
-              checked={formData.serviceOption === "Đăng kí thêm"}
+              value="Doanh nghiệp"
+              checked={formData.serviceOption === "Doanh nghiệp"}
               onChange={handleChange}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
-            <span className="ml-2 text-sm text-gray-900">Đăng kí thêm</span>
+            <span className="ml-2 text-sm text-gray-900">Doanh nghiệp</span>
           </label>
         </div>
         {errors.serviceOption && (
