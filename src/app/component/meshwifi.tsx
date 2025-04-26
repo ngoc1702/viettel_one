@@ -169,7 +169,7 @@ export default function MESH_WIFI({ posts }: { posts: Post[] }) {
 
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-12 md:p-16 relative md:min-w-[800px]">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 md:p-16 relative md:min-w-[800px] mx-2">
             <button
               onClick={togglePopup}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
