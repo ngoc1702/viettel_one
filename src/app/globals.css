@@ -37,8 +37,13 @@ body {
 }
 
 input:focus-visible {
-  border-color: #CE2127 !important;
-  box-shadow: 0 0 0 1px #CE2127;
+  outline: none;
+  border: 1px solid #CE2127;
+  
+}
+select:focus-visible {
+  outline: none;
+  border: 1px solid #CE2127;
 }
 
 
@@ -143,3 +148,4 @@ ul, ol {
     max-width: 20px; 
   }
 }
+

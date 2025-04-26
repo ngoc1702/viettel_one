@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import AddressForm, { AddressData } from "./api_address";
 import emailjs from "emailjs-com";
+import Swal from 'sweetalert2';
 
 type FormData = {
   name: string;
   phone: string;
   serviceOption: string;
-  addressOption: string;
+
   cityName: string;
   districtName: string;
   wardName: string;
@@ -18,31 +19,31 @@ type FormData = {
 type ErrorMessages = {
   [K in keyof FormData]: string;
 };
+const initialErrors: ErrorMessages = {
+  name: "",
+  phone: "",
+  serviceOption: "",
+  cityName: "",
+  districtName: "",
+  wardName: "",
+  detail: "",
+};
+
+
 
 export default function REGISTRATION_FORM() {
+  
   const [address, setAddress] = useState<AddressData | null>(null);
-
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
     serviceOption: "",
-    addressOption: "",
     cityName: "",
     districtName: "",
     wardName: "",
     detail: "",
   });
-
-  const [errors, setErrors] = useState<ErrorMessages>({
-    name: "",
-    phone: "",
-    serviceOption: "",
-    addressOption: "",
-    cityName: "",
-    districtName: "",
-    wardName: "",
-    detail: "",
-  });
+  const [errors, setErrors] = useState<ErrorMessages>(initialErrors);
 
   const getErrorMessage = (key: string, value: string): string => {
     if (!value || value.trim() === "") {
@@ -53,8 +54,6 @@ export default function REGISTRATION_FORM() {
           return "Vui lòng nhập số điện thoại.";
         case "serviceOption":
           return "Vui lòng chọn hình thức đăng ký.";
-        case "addressOption":
-          return "Vui lòng chọn địa chỉ lắp đặt.";
         case "cityName":
           return "Vui lòng chọn tỉnh/thành phố.";
         case "districtName":
@@ -67,21 +66,18 @@ export default function REGISTRATION_FORM() {
           return "Trường này bắt buộc.";
       }
     }
-  
+
     if (key === "phone") {
       const phoneRegex = /^0\d{9}$/;
       if (!phoneRegex.test(value.trim())) {
         return "Số điện thoại phải bắt đầu bằng số 0 và có 10 số.";
       }
     }
-  
+
     return "";
   };
-  
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -122,33 +118,24 @@ export default function REGISTRATION_FORM() {
     let hasError = false;
     const newErrors: ErrorMessages = { ...errors };
 
-    // Danh sách các trường cơ bản và các trường địa chỉ
-    const baseFields: (keyof FormData)[] = [
-      "name",
-      "phone",
-      "serviceOption",
-      "addressOption",
-    ];
-
-    // Kiểm tra từng trường trong baseFields
+    const baseFields: (keyof FormData)[] = ["name", "phone", "serviceOption"];
     for (const key of baseFields) {
       const value = formData[key];
       const error = getErrorMessage(key, value);
       if (error) {
-        newErrors[key] = error; // Lưu lỗi cho trường này
-        hasError = true; // Có lỗi, cần dừng lại
-        break; // Dừng lại nếu có lỗi, không kiểm tra các trường còn lại
+        newErrors[key] = error;
+        hasError = true;
+        break;
       } else {
-        newErrors[key] = ""; // Nếu không có lỗi, reset lỗi
+        newErrors[key] = "";
       }
     }
 
     if (hasError) {
-      setErrors(newErrors); // Cập nhật lỗi nếu có
-      return; // Dừng lại nếu có lỗi
+      setErrors(newErrors);
+      return;
     }
 
-    // Kiểm tra các trường địa chỉ (addressFields) nếu không có lỗi trước đó
     const addressFields: (keyof FormData)[] = [
       "cityName",
       "districtName",
@@ -160,28 +147,20 @@ export default function REGISTRATION_FORM() {
       const value = formData[key];
       const error = getErrorMessage(key, value);
       if (error) {
-        newErrors[key] = error; 
+        newErrors[key] = error;
         hasError = true;
-        break; 
+        break;
       } else {
-        newErrors[key] = ""; 
+        newErrors[key] = "";
       }
     }
 
     if (hasError) {
       setErrors(newErrors);
-      return; 
+      return;
     }
 
-    
-    const readableData = `Tên: ${formData.name}
-  Số điện thoại: ${formData.phone}
-  Hình thức đăng ký: ${formData.serviceOption}
-  Địa chỉ lắp đặt: ${formData.addressOption}
-  Địa chỉ chi tiết: ${formData.detail}, ${formData.wardName}, ${formData.districtName}, ${formData.cityName}`;
-
-    alert(`Đăng ký thành công!\n${readableData}`);
-
+    // Send email
     emailjs
       .send(
         "service_d3cl9zs",
@@ -191,11 +170,33 @@ export default function REGISTRATION_FORM() {
       )
       .then((response) => {
         console.log("Email sent successfully:", response);
+
+        // Show success message
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công!',
+          text: 'Thông tin của bạn đã được gửi!',
+        }).then(() => {
+          // Reset the form data after success
+          setFormData({
+            name: '',
+            phone: '',
+            serviceOption: '',
+            cityName: '',  // reset address fields
+            districtName: '',
+            wardName: '',
+            detail: '',
+          });
+          setErrors(initialErrors);  // reset error messages
+        });
       })
       .catch((error) => {
         console.error("Error sending email:", error);
       });
   };
+  
+  
+  
 
   return (
     <form className="mx-auto" onSubmit={handleSubmit}>
@@ -249,23 +250,23 @@ export default function REGISTRATION_FORM() {
             <input
               type="radio"
               name="serviceOption"
-              value="Đăng kí mới"
-              checked={formData.serviceOption === "Đăng kí mới"}
+              value="Cá nhân"
+              checked={formData.serviceOption === "Cá nhân"}
               onChange={handleChange}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
-            <span className="ml-2 text-sm text-gray-900">Đăng kí mới</span>
+            <span className="ml-2 text-sm text-gray-900">Cá nhân</span>
           </label>
           <label className="inline-flex items-center">
             <input
               type="radio"
               name="serviceOption"
-              value="Đăng kí thêm"
-              checked={formData.serviceOption === "Đăng kí thêm"}
+              value="Doanh nghiệp"
+              checked={formData.serviceOption === "Doanh nghiệp"}
               onChange={handleChange}
               className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
             />
-            <span className="ml-2 text-sm text-gray-900">Đăng kí thêm</span>
+            <span className="ml-2 text-sm text-gray-900">Doanh nghiệp</span>
           </label>
         </div>
         {errors.serviceOption && (
@@ -273,41 +274,7 @@ export default function REGISTRATION_FORM() {
         )}
       </div>
 
-      {/* Địa chỉ lắp đặt */}
-      <div className="mb-5">
-        <div className="block mb-3 text-base font-semibold text-gray-700">
-          Địa chỉ lắp đặt
-        </div>
-        <div className="flex flex-row gap-12">
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="addressOption"
-              value="Nhà riêng"
-              checked={formData.addressOption === "Nhà riêng"}
-              onChange={handleChange}
-              className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
-            />
-            <span className="ml-2 text-sm text-gray-900">Nhà riêng</span>
-          </label>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="addressOption"
-              value="Khu đô thị / Chung cư"
-              checked={formData.addressOption === "Khu đô thị / Chung cư"}
-              onChange={handleChange}
-              className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
-            />
-            <span className="ml-2 text-sm text-gray-900">
-              Khu đô thị / Chung cư
-            </span>
-          </label>
-        </div>
-        {errors.addressOption && (
-          <p className="text-red-500 text-sm mt-1">{errors.addressOption}</p>
-        )}
-      </div>
+
       <div className=" mb-5">
       <AddressForm
   value={formData}
@@ -324,9 +291,9 @@ export default function REGISTRATION_FORM() {
 
       <button
         type="submit"
-        className="text-white bg-[#CE2127] hover:bg-[#AA0000] focus:ring-4 focus:outline-none 
-          focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 
-          text-center dark:bg-[#CE2127] dark:hover:bg-[#AA0000] dark:focus:ring-blue-800"
+        className="text-white bg-[#CE2127] hover:bg-[#AA0000]  focus:outline-none 
+          font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 
+          text-center"
       >
         Gửi
       </button>

@@ -51,18 +51,16 @@ const AddressForm = forwardRef<AddressFormHandle, AddressFormProps>(
     const [districts, setDistricts] = useState<Location[]>([]);
     const [wards, setWards] = useState<Location[]>([]);
 
-    const [selectedCityCode, setSelectedCityCode] = useState("");
-    const [selectedDistrictCode, setSelectedDistrictCode] = useState("");
-    const [selectedWardCode, setSelectedWardCode] = useState("");
+    const [selectedCityCode, setSelectedCityCode] = useState(value.cityName || "");
+    const [selectedDistrictCode, setSelectedDistrictCode] = useState(value.districtName || "");
+    const [selectedWardCode, setSelectedWardCode] = useState(value.wardName || "");
     const [detailAddress, setDetailAddress] = useState(value.detail || "");
 
     // Fetch cities
     useEffect(() => {
       const fetchCities = async () => {
         try {
-          const res = await axios.get<Location[]>(
-            "https://provinces.open-api.vn/api/?depth=1"
-          );
+          const res = await axios.get<Location[]>("https://provinces.open-api.vn/api/?depth=1");
           setCities(res.data);
         } catch (err) {
           console.error("Error fetching cities:", err);
@@ -74,9 +72,7 @@ const AddressForm = forwardRef<AddressFormHandle, AddressFormProps>(
     const fetchDistricts = useCallback(async (cityCode: string) => {
       if (cityCode) {
         try {
-          const res = await axios.get<Province>(
-            `https://provinces.open-api.vn/api/p/${cityCode}?depth=2`
-          );
+          const res = await axios.get<Province>(`https://provinces.open-api.vn/api/p/${cityCode}?depth=2`);
           setDistricts(res.data.districts);
         } catch (err) {
           console.error("Error fetching districts:", err);
@@ -87,9 +83,7 @@ const AddressForm = forwardRef<AddressFormHandle, AddressFormProps>(
     const fetchWards = useCallback(async (districtCode: string) => {
       if (districtCode) {
         try {
-          const res = await axios.get<District>(
-            `https://provinces.open-api.vn/api/d/${districtCode}?depth=2`
-          );
+          const res = await axios.get<District>(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
           setWards(res.data.wards);
         } catch (err) {
           console.error("Error fetching wards:", err);
@@ -112,21 +106,18 @@ const AddressForm = forwardRef<AddressFormHandle, AddressFormProps>(
     }, [selectedDistrictCode, fetchWards]);
 
     useEffect(() => {
-      const cityName =
-        cities.find((c) => c.code.toString() === selectedCityCode)?.name || "";
-      const districtName =
-        districts.find((d) => d.code.toString() === selectedDistrictCode)?.name || "";
-      const wardName =
-        wards.find((w) => w.code.toString() === selectedWardCode)?.name || "";
-    
+      const cityName = cities.find((c) => c.code.toString() === selectedCityCode)?.name || "";
+      const districtName = districts.find((d) => d.code.toString() === selectedDistrictCode)?.name || "";
+      const wardName = wards.find((w) => w.code.toString() === selectedWardCode)?.name || "";
+
       const newAddressData: AddressData = {
         cityName,
         districtName,
         wardName,
         detail: detailAddress,
       };
-    
-      // So sánh trước khi gọi onChange để tránh update vô hạn
+
+      // Gọi onChange khi có sự thay đổi giá trị
       if (
         newAddressData.cityName !== value.cityName ||
         newAddressData.districtName !== value.districtName ||
@@ -152,12 +143,15 @@ const AddressForm = forwardRef<AddressFormHandle, AddressFormProps>(
 
     useImperativeHandle(ref, () => ({
       reset() {
+        // Gọi onChange với giá trị mặc định khi reset
         onChange({
           cityName: "",
           districtName: "",
           wardName: "",
           detail: "",
         });
+
+        // Cập nhật lại state
         setSelectedCityCode("");
         setSelectedDistrictCode("");
         setSelectedWardCode("");
@@ -167,9 +161,7 @@ const AddressForm = forwardRef<AddressFormHandle, AddressFormProps>(
 
     return (
       <div>
-        <div className="block mb-3 text-base font-semibold text-gray-700">
-          Nhập địa chỉ
-        </div>
+        <div className="block mb-3 text-base font-semibold text-gray-700">Nhập địa chỉ</div>
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-10 md:gap-y-4 gap-4">
           <div>
             <select
@@ -190,6 +182,7 @@ const AddressForm = forwardRef<AddressFormHandle, AddressFormProps>(
             </select>
             {errors.cityName && <div className="text-red-500 text-sm mt-1">{errors.cityName}</div>}
           </div>
+         
 
           <div>
             <select
