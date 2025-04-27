@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import AddressForm, { AddressData } from "./api_address";
+import { useState, useEffect, useCallback, useRef } from "react";
+import AddressForm, { AddressData, AddressFormHandle } from "./api_address";
 import emailjs from "emailjs-com";
 import Swal from 'sweetalert2';
 
@@ -32,7 +32,8 @@ const initialErrors: ErrorMessages = {
 
 
 export default function REGISTRATION_FORM() {
-  
+  const addressFormRef = useRef<AddressFormHandle>(null);
+
   const [address, setAddress] = useState<AddressData | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -187,7 +188,8 @@ export default function REGISTRATION_FORM() {
             wardName: '',
             detail: '',
           });
-          setErrors(initialErrors);  // reset error messages
+          setErrors(initialErrors);  
+          addressFormRef.current?.reset();
         });
       })
       .catch((error) => {
@@ -277,8 +279,9 @@ export default function REGISTRATION_FORM() {
 
       <div className=" mb-5">
       <AddressForm
+  ref={addressFormRef}
   value={formData}
-  onChange={(data) => handleAddressChange(data as AddressData)} // ép kiểu tại đây
+  onChange={(data) => handleAddressChange(data as AddressData)}
   errors={{
     cityName: errors.cityName,
     districtName: errors.districtName,
@@ -286,6 +289,7 @@ export default function REGISTRATION_FORM() {
     detail: errors.detail,
   }}
 />
+
 
       </div>
 
