@@ -52,9 +52,9 @@ export default function MESH_WIFI({ posts }: { posts: Post[] }) {
 
   return (
     <>
-      <div className="max-content px-3 md:px-0 py-20 z-1">
+      <div className="max-content px-3 md:px-0 py-10 md:py-20 z-1">
         <div className="flex justify-between items-center">
-          <h1 className="text-black uppercase mb-6">
+          <h1 className="text-black text-xl md:text-4xl uppercase md:mb-6 mb-2">
             Các gói cước tốc độ cao, tích hợp giải pháp Mesh wifi
           </h1>
         </div>
@@ -86,7 +86,7 @@ export default function MESH_WIFI({ posts }: { posts: Post[] }) {
                   <SwiperSlide key={post._id} className="flex justify-center items-center">
                     <div className="w-full">
                       <div className="min-h-[265px] md:min-h-[370px] justify-between items-center h-full md:p-6 p-4 rounded-[40px] flex flex-col relative bg-white light-pink-shadow my-2 mx-[2px]">
-                        <a href={`/package/${post?.slug.current}`}>
+                        <a href={`/internet_truyenhinh/${post?.slug.current}`}>
                           <span className="bg-[#CE2127] text-white px-3 py-1 text-sm md:text-2xl font-bold tracking-tight absolute right-[50%] translate-x-1/2 top-0 rounded-b-[15px]">
                             {post?.title}
                           </span>
@@ -142,7 +142,7 @@ export default function MESH_WIFI({ posts }: { posts: Post[] }) {
                           >
                             Đăng ký
                           </button>
-                          <a href={`/package/${post?.slug.current}`} aria-label="Xem chi tiết gói cước">
+                          <a href={`/internet_truyenhinh/${post?.slug.current}`} aria-label="Xem chi tiết gói cước">
                             <button className="min-w-[100px] flex justify-center items-center gap-1 text-center text-[#CE2127] bg-[#FFFFFF] border-[#CE2127] border-[1px] py-2 focus:outline-none hover:bg-gray-100 rounded-[25px] font-semibold">
                               Chi tiết
                             </button>
