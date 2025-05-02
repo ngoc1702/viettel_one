@@ -9,6 +9,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { client } from "../(sanity)/lib/client";
 import { POSTS_QUERY2 } from "../(sanity)/lib/queries";
 import Image from "next/image";
+import REGISTRATION_FORM from "./registration_form";
 
 interface Category {
   title: string;
@@ -74,10 +75,11 @@ const fetchPost = async (slug: string): Promise<Post | null> => {
 
 // ✅ Đây là component hiển thị gói tương tự
 export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [showPopup, setShowPopup] = useState(false);
+  const togglePopup = () => setShowPopup(!showPopup);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,14 +87,14 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
       try {
         const post = await fetchPost(slug);
         setSelectedPost(post);
-  
+
         if (!post?.categories) {
           setPosts([]);
           return;
         }
-  
+
         const fetchedPosts = await client.fetch<Post[]>(POSTS_QUERY2);
-  
+
         const filteredPosts = fetchedPosts.filter((fetchedPost) => {
           const sameCategory =
             fetchedPost.categories?.some((fetchedCategory) =>
@@ -101,7 +103,7 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
                   selectedCategory.title === fetchedCategory.title
               )
             ) ?? false;
-  
+
           const sameSubCategory =
             fetchedPost.sub_categories?.some((fetchedSubCategory) =>
               post.sub_categories?.some(
@@ -109,19 +111,14 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
                   selectedSubCategory.title === fetchedSubCategory.title
               )
             ) ?? false;
-  
+
           // Ưu tiên lọc theo sub_categories nếu có, nếu không có thì lọc theo categories
           const isSimilar =
-            post.sub_categories?.length > 0
-              ? sameSubCategory
-              : sameCategory;
-  
-          return (
-            isSimilar &&
-            fetchedPost.slug.current !== post.slug.current
-          );
+            post.sub_categories?.length > 0 ? sameSubCategory : sameCategory;
+
+          return isSimilar && fetchedPost.slug.current !== post.slug.current;
         });
-  
+
         setPosts(filteredPosts);
       } catch (err) {
         console.error("Lỗi khi fetch data:", err);
@@ -129,7 +126,7 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, [slug]);
 
@@ -141,36 +138,22 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
     return <div>Post not found</div>;
   }
 
-  const handleOpenPopup = (post: Post) => {
-    setSelectedPost(post);
-    setIsPopupVisible(true);
-  };
-
-  const handleClosePopup = () => {
-    setIsPopupVisible(false);
-  };
-
-
   return (
     <>
       <div className="max-content px-3 pb-16">
         <div className="mb-10 max-content ">
-          {/* <button
-            onClick={() => handleOpenPopup(selectedPost!)} // Sử dụng post để mở popup
-            className="hidden md:flex  gap-1 items-center mt-auto text-white bg-[#CE2127] border-0 py-3 px-12 focus:outline-none hover:bg-[#AA0000] rounded-[5px] font-semibold"
+          <button
+            onClick={togglePopup}
+            className="hidden md:flex mt-6 gap-1 items-center  text-white bg-[#CE2127] border-0 py-3 px-12 focus:outline-none hover:bg-[#AA0000] rounded-[5px] font-semibold"
           >
             Đăng ký
-          </button> */}
-{/* 
-          <button className="text-sm flex md:hidden gap-1 items-center mt-auto text-white bg-[#CE2127] border-0 py-3 px-12 focus:outline-none hover:bg-[#AA0000] rounded-[5px] font-semibold">
-            <a aria-label="Đăng ký"
-              className="w-full h-full flex items-center justify-center text-white"
-              href={`sms:290?body=${encodeURIComponent(`${selectedPost.title} ${selectedPost.globalField}`)}`}
-            >
-              Đăng ký
-            </a>
           </button>
-        */}
+
+          <button  onClick={togglePopup} className="text-sm flex md:hidden gap-1 items-center mt-auto text-white bg-[#CE2127] border-0 py-3 px-8 focus:outline-none hover:bg-[#AA0000] rounded-[5px] font-semibold">
+           
+              Đăng ký
+            
+          </button>
         </div>
         <h1 className="uppercase md:px-0 font-bold text-[36px] leading-[80px] max-md:max-w-full max-md:text-2xl max-md:leading-[36px]">
           <span className=" text-[#141718]">Gói Cước Tương Tự</span>
@@ -237,12 +220,15 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
 
                     <div className="flex gap-[22px]">
                       <button
-                        onClick={() => handleOpenPopup(post)}
+                        onClick={togglePopup}
                         className="flex gap-1 items-center mt-auto text-white bg-[#CE2127] border-0 py-2 px-6 focus:outline-none hover:bg-[#AA0000] rounded-[25px] font-semibold"
                       >
                         Đăng ký
                       </button>
-                      <a href={`/internet_truyenhinh/${post?.slug.current}`} aria-label="Xem chi tiết">
+                      <a
+                        href={`/internet_truyenhinh/${post?.slug.current}`}
+                        aria-label="Xem chi tiết"
+                      >
                         <button className="min-w-[100px] flex justify-center items-center gap-1 text-center text-[#CE2127] bg-[#FFFFFF] border-[#CE2127] border-[1px] py-2 focus:outline-none hover:bg-gray-100 rounded-[25px] font-semibold">
                           Chi tiết
                         </button>
@@ -281,7 +267,10 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
                   <div className="w-full">
                     <div className=" min-w-[170px] min-h-[275px] justify-between items-center h-full p-4 rounded-[40px] flex flex-col relative bg-white light-pink-shadow my-2 mx-[2px]">
                       {/* Post Title */}
-                      <a href={`/internet_truyenhinh/${post?.slug.current}`} aria-label="Xem chi tiết">
+                      <a
+                        href={`/internet_truyenhinh/${post?.slug.current}`}
+                        aria-label="Xem chi tiết"
+                      >
                         <span className="bg-[#CE2127] text-white px-3 py-1 text-sm font-bold tracking-tight absolute right-[50%] translate-x-1/2 top-0 rounded-b-[15px]">
                           {post?.title}
                         </span>
@@ -332,13 +321,7 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
                         {/* Register Button */}
                         <button
                           className="text-sm flex gap-1 items-center mt-auto text-white bg-[#CE2127] border-0 py-2 px-4 focus:outline-none hover:bg-[#AA0000] rounded-[25px] font-semibold"
-                          onClick={() => {
-                            const phoneNumber = "290";
-                            const message = encodeURIComponent(
-                              `${post.title} ${post.globalField}`
-                            );
-                            window.location.href = `sms:${phoneNumber}?body=${message}`;
-                          }}
+                          onClick={togglePopup}
                         >
                           Đăng ký
                         </button>
@@ -349,46 +332,21 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
               ))}
           </Swiper>
         </div>
-
-        {isPopupVisible && selectedPost && (
-          <div className="fixed inset-0 z-50 px-5 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="absolute inset-0 "></div>
-            <div className="relative z-10 bg-white p-8 rounded shadow-lg max-w-md w-full">
-              <h2 className="text-xl font-bold mb-4 text-center">Thông báo</h2>
-              <span className="mb-4">
-                Để đăng ký gói cước, vui lòng soạn tin nhắn trên điện thoại theo
-                cú pháp
-                <span className="text-[#CE2127]">
-                  {" "}
-                  {selectedPost?.title} {selectedPost?.globalField}
-                </span>{" "}
-                gửi <span className="text-[#CE2127]">290</span>. Để xem các thuê
-                bao áp dụng gói cước trên, vui lòng kiểm tra tại link dưới.
-              </span>
-              <div className="flex justify-center gap-6 mt-6 text-center items-center">
-                <button
-                  onClick={handleClosePopup}
-                  className="min-w-[120px] flex justify-center items-center gap-1 text-center text-[#CE2127] bg-[#FFFFFF] border-[#CE2127] border-[1px] py-2 focus:outline-none hover:bg-gray-100 rounded-[25px] font-semibold"
-                >
-                  Đóng
-                </button>
-                <a href="https://viettel.vn/lan-toa/goi-cuoc?kh=VANLTH_HNI_HKD" aria-label="Kiểm tra ngay">
-                  <button className="min-w-[120px] flex justify-center items-center gap-1 text-white bg-[#CE2127] border-0 py-[8.5px] px-6 focus:outline-none hover:bg-[#AA0000] rounded-[25px] font-semibold">
-                    Kiểm tra ngay
-                  </button>
-                </a>
-              </div>
-
-              <button
-                onClick={handleClosePopup}
-                className="absolute top-2 right-2 text-gray-500 hover:text-black"
-              >
-                <FontAwesomeIcon icon={faXmark} width={12} />
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 md:p-16 relative md:min-w-[800px] mx-2">
+            <button
+              onClick={togglePopup}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+            >
+              ✕
+            </button>
+            <REGISTRATION_FORM />
+          </div>
+        </div>
+      )}
     </>
   );
 }
