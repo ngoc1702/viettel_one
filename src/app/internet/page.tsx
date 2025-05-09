@@ -1,6 +1,7 @@
 import Background from "@public/assets/img/bginterne.jpg";
 import Image from "next/image";
 import DATA_INTERNET from "../component/data_internet";
+import DATA_INTERNET_TRUYENHINH from "../component/data_internet_truyenhinh";
 export default function Page() {
   return (
     <>
@@ -22,6 +23,7 @@ export default function Page() {
       </div>
 
       <DATA_INTERNET />
+      <DATA_INTERNET_TRUYENHINH/>
     </>
   );
 }

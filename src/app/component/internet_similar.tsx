@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode } from "swiper/modules";
 import "swiper/css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { client } from "../(sanity)/lib/client";
 import { POSTS_QUERY2 } from "../(sanity)/lib/queries";
 import Image from "next/image";
@@ -73,7 +71,6 @@ const fetchPost = async (slug: string): Promise<Post | null> => {
   return await client.fetch(query, { slug });
 };
 
-// ✅ Đây là component hiển thị gói tương tự
 export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -174,7 +171,7 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
                 <div className="p-4 w-full">
                   <div className="min-h-[370px] justify-between items-center p-6 rounded-[40px] flex flex-col relative bg-white light-pink-shadow my-2 mx-[2px]">
                     <div className="bg-[#CE2127] text-white px-3 py-1 text-2xl font-bold tracking-tight absolute right-[50%] translate-x-1/2 top-0 rounded-b-[15px]">
-                      {post.title}
+                    {post.title.length > 13 ? post.title.slice(0, 13) + '...' : post.title}
                     </div>
 
                     <h1 className="mt-10 text-4xl font-bold text-gray-900 leading-none flex items-end pb-4 mb-4 border-b border-gray-200">
@@ -272,7 +269,7 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
                         aria-label="Xem chi tiết"
                       >
                         <span className="bg-[#CE2127] text-white px-3 py-1 text-sm font-bold tracking-tight absolute right-[50%] translate-x-1/2 top-0 rounded-b-[15px]">
-                          {post?.title}
+                        {post.title.length > 10 ? post.title.slice(0, 10) + '...' : post.title}
                         </span>
                       </a>
                       {/* Traffic and Free info */}

@@ -156,12 +156,13 @@ export default async function Page({ params }: PageProps) {
       className="w-14 h-14 rounded-full flex-shrink-0 object-cover object-center"
     />
     <span className="flex-grow flex flex-col pl-4">
-      <span className="title-font font-medium text-gray-600">
+      <span className="title-font font-medium text-gray-600 ">
         Tên gói
       </span>
-      <span className="text-gray-900 text-xl md:text-3xl font-bold mt-1">
-        {post.title}
-      </span>
+      <span className="text-gray-900 text-xl md:text-3xl font-bold mt-1 ">
+  {post.title.length > 15 ? post.title.slice(0, 15) + '...' : post.title}
+</span>
+
     </span>
   </a>
 </div>
