@@ -3,14 +3,12 @@ import { PortableText } from "@portabletext/react";
 import { PortableTextBlock } from "@portabletext/react";
 import { urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
-// import Price from "@public/assets/img/cuoc.svg";
-// import Clock from "@public/assets/img/clock.svg";
-// import Traffic from "@public/assets/img/data.svg";
 import Name from "@public/assets/img/ten_goi.svg"
 import Price from "@public/assets/img/gia_goi.svg"
 import DATA from "@public/assets/img/tocdo.svg"
 import RegisterButton from "@/app/component/btn_registration";
 import INTERNET_SIMILAR from "@/app/component/internet_similar";
+
 
 
 
@@ -95,7 +93,6 @@ export default async function Page({ params }: PageProps) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: post.title,
-    // description: extractText(post.body),
     offers: {
       "@type": "Offer",
       priceCurrency: "VND",
@@ -219,11 +216,13 @@ export default async function Page({ params }: PageProps) {
             </div>
           </div>
           <div className="flex flex-col md:flex-row gap-0 md:gap-20">
+        
             <img
-              className="lg:h-[50vh] md:h-36 w-full md:w-[40%] mx-auto object-contain object-center "
+              className="lg:h-[50vh] md:h-36 w-full md:w-[100%] mx-auto object-contain object-center "
               src={urlFor(post.mainImage).url()}
               alt={post.mainImage?.alt}
             />
+         
             <div className="mb-8 max-content mt-6">
               <PortableText value={post.body} />
             </div>

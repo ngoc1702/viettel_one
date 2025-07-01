@@ -102,7 +102,6 @@ const ReplaceWord = () => {
     {loading ? "Đang thay thế..." : "Thay thế từ"}
   </button>
 </div>
-
       <p className="mt-4">{message}</p>
     </div>
   );

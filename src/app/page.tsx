@@ -19,10 +19,10 @@ export default async function Home() {
           GÓI CƯỚC DATA 4G 5G VIETTEL
         </p>
         <p className=" text-[16px] leading-[32px] max-md:max-w-full max-md:text-[14px] max-md:leading-[24px]">
-          Đăng ký gói cước data 4G 5G tốc độ cao dễ dàng cùng Viettel.one!
+          Đăng ký gói cước data 4G 5G tốc độ cao dễ dàng cùng <strong>viettelone.vn</strong>
         </p>
         <p className=" text-[16px] leading-[32px] max-md:max-w-full max-md:text-[14px] max-md:leading-[24px]">
-          Viettelone là website phù hợp với giới trẻ, cung cấp thông tin đầy
+          <strong>viettelone.vn</strong> là website phù hợp với giới trẻ, cung cấp thông tin đầy
           đủ và chính xác mọi dịch vụ, khuyến mại của Viettel.
         </p>
       </section>

@@ -2,8 +2,8 @@
 // import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import React, { useState, useEffect } from "react";
-import Loading from "./component/loading";
+// import React, { useState, useEffect } from "react";
+// import Loading from "./component/loading";
 import Header from "./component/header";
 import Footer from "./component/footer";
 import Script from "next/script";
@@ -24,15 +24,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setLoading(false);
+  //   }, 1000);
 
-    return () => clearTimeout(timer);
-  }, []);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   return (
     <html lang="en">
@@ -68,8 +68,8 @@ export default function RootLayout({
           style={{ display: "none", visibility: "hidden" }}
         ></iframe>
       </noscript>
-        {/* End Google Tag Manager (noscript) */}
-        {loading && <Loading />}
+   
+        {/* {loading && <Loading />} */}
         <Header />
         <div className="transparent-background">{children}</div>
         <Footer />

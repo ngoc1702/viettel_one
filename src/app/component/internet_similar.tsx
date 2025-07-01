@@ -146,10 +146,11 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
             Đăng ký
           </button>
 
-          <button  onClick={togglePopup} className="text-sm flex md:hidden gap-1 items-center mt-auto text-white bg-[#CE2127] border-0 py-3 px-8 focus:outline-none hover:bg-[#AA0000] rounded-[5px] font-semibold">
-           
-              Đăng ký
-            
+          <button
+            onClick={togglePopup}
+            className="text-sm flex md:hidden gap-1 items-center mt-auto text-white bg-[#CE2127] border-0 py-3 px-8 focus:outline-none hover:bg-[#AA0000] rounded-[5px] font-semibold"
+          >
+            Đăng ký
           </button>
         </div>
         <h1 className="uppercase md:px-0 font-bold text-[36px] leading-[80px] max-md:max-w-full max-md:text-2xl max-md:leading-[36px]">
@@ -171,7 +172,9 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
                 <div className="p-4 w-full">
                   <div className="min-h-[370px] justify-between items-center p-6 rounded-[40px] flex flex-col relative bg-white light-pink-shadow my-2 mx-[2px]">
                     <div className="bg-[#CE2127] text-white px-3 py-1 text-2xl font-bold tracking-tight absolute right-[50%] translate-x-1/2 top-0 rounded-b-[15px]">
-                    {post.title.length > 13 ? post.title.slice(0, 13) + '...' : post.title}
+                      {post.title.length > 13
+                        ? post.title.slice(0, 13) + "..."
+                        : post.title}
                     </div>
 
                     <h1 className="mt-10 text-4xl font-bold text-gray-900 leading-none flex items-end pb-4 mb-4 border-b border-gray-200">
@@ -269,7 +272,9 @@ export default function INTERNET_SIMILAR({ slug }: { slug: string }) {
                         aria-label="Xem chi tiết"
                       >
                         <span className="bg-[#CE2127] text-white px-3 py-1 text-sm font-bold tracking-tight absolute right-[50%] translate-x-1/2 top-0 rounded-b-[15px]">
-                        {post.title.length > 10 ? post.title.slice(0, 10) + '...' : post.title}
+                          {post.title.length > 10
+                            ? post.title.slice(0, 10) + "..."
+                            : post.title}
                         </span>
                       </a>
                       {/* Traffic and Free info */}
